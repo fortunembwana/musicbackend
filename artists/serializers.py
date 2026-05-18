@@ -1,31 +1,32 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User  
+
 from .models import Artist
 
-class UserSerializer(serializers.ModelSerializer):
+class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
+        model = Artist
+        fields = ['artist_id', 'stage_name', 'phone_number', 'bio', 'profile_image', 'username', 'email']
+        read_only_fields = ['artist_id', 'created_at', 'added_by']
 
-class ArtistRegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
-    email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(write_only=True)
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data.pop('added_by', None)  # Remove added_by if it's in the validated data
+        if request and hasattr(request, 'user'):
+            validated_data['added_by'] = request.user  # Set added_by to the current user
+        return super().create(validated_data)
+
+class ArtistListSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Artist
+        fields = ['artist_id', 'stage_name', 'phone_number' ]
+
+   
+
+class ArtistDetailSerializer(serializers.ModelSerializer):
+    added_by = serializers.CharField(source='added_by.username', read_only=True)
+    
 
     class Meta:
         model = Artist
-        fields = ['username', 'email', 'password', 'stage_name', 'phone_number', 'bio']
-
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
-        artist = Artist.objects.create(
-            user=user,
-            stage_name=validated_data['stage_name'],
-            phone_number=validated_data['phone_number'],
-            bio=validated_data.get('bio', '')
-        )
-        return artist
+        fields = ['artist_id', 'stage_name', 'phone_number', 'bio', 'profile_image', 'is_verified', 'created_at', 'added_by']
