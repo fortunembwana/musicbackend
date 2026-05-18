@@ -54,3 +54,19 @@ class SongDownloadView(generics.GenericAPIView):
         response = FileResponse(song.audio_file.open('rb'), as_attachment=True)
         response['Content-Disposition'] = f'attachment; filename="{song.title}.mp3"'
         return response
+    
+class SongStreamView(generics.GenericAPIView):
+    """Stream audio (for playing in browser)"""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, song_id):
+        song = get_object_or_404(Song, id=song_id, approval_status='approved')
+        
+        # Increment stream count
+        song.streams += 1
+        song.save(update_fields=['streams'])
+        
+        response = FileResponse(song.audio_file.open('rb'))
+        response['Content-Type'] = 'audio/mpeg'
+        response['Accept-Ranges'] = 'bytes'
+        return response
