@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'corsheaders',
     
     # Local apps
+    'user_management',
+    'album',
     'artists',
     'songs',
-    'payments',
-    'coreapi',
+    'news'
+  
 ]
 
 MIDDLEWARE = [
@@ -125,6 +127,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+
+# Custom user model
+AUTH_USER_MODEL = 'user_management.User'
+
 STATIC_URL = 'static/'
 
 # Media Files (songs, images, payment proof)
@@ -133,8 +139,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_AUNTHENTENTICATION_CLASSES': [
-        'rest_framework_simplejwg.aunthentication.JWTAunthentication',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',

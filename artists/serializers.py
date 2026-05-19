@@ -19,13 +19,19 @@ class ArtistListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Artist
-        fields = ['artist_id', 'stage_name', 'phone_number' ]
+        fields = ['artist_id', 'stage_name']
 
    
 
 class ArtistDetailSerializer(serializers.ModelSerializer):
-    added_by = serializers.CharField(source='added_by.username', read_only=True)
-    
+    added_by = serializers.SerializerMethodField(read_only=True)
+
+    def get_added_by(self, obj):
+        user = obj.added_by
+        if not user:
+            return None
+        full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+        return full_name or user.username
 
     class Meta:
         model = Artist
