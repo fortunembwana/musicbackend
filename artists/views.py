@@ -1,42 +1,27 @@
-# from rest_framework import generics, status
-# from rest_framework.response import Response
-# from django.contrib.auth.models import User
-# from rest_framework_simplejwt.views import TokenObtainPairView
-# from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import generics, permissions
 
-# from .models import Artist
-# from .serializers import ArtistRegisterSerializer   
-
-
-# class ArtistRegisterView(generics.CreateAPIView):
-#     serializer_class = ArtistRegisterSerializer
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         artist = serializer.save()
-        
-#         return Response({
-#             "message": "Artist registered successfully",
-#             "artist": {
-#                 "stage_name": artist.stage_name,
-#                 "username": artist.user.username
-#             }
-#         }, status=status.HTTP_201_CREATED)
+from .models import Artist
+from .serializers import (
+    ArtistSerializer,
+    ArtistListSerializer,
+    ArtistDetailSerializer
+)
 
 
-# class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-#     @classmethod
-#     def get_token(cls, user):
-#         token = super().get_token(user)
-#         token['username'] = user.username
-        
-#         # Safely add stage_name if artist profile exists
-#         if hasattr(user, 'artist'):
-#             token['stage_name'] = user.artist.stage_name
-            
-#         return token
+class ArtistCreateView(generics.CreateAPIView):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
-# class ArtistLoginView(TokenObtainPairView):
-#     serializer_class = MyTokenObtainPairSerializer
+class ArtistListView(generics.ListAPIView):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistListSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class ArtistDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = "artist_id"
