@@ -2,8 +2,9 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, permissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from artists.models import Artist
 from .models import Song
 from .serializers import (
     CreateSongSerializer,
@@ -12,6 +13,20 @@ from .serializers import (
 )
 
 
+
+class ArtistMySongsView(generics.ListAPIView):
+    serializer_class = SongListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        artist = Artist.objects.get(
+            user=self.request.user
+        )
+
+        return Song.objects.filter(
+            artist=artist
+        ).order_by('-created_at')
+    
 class SongCreateView(generics.CreateAPIView):
     queryset = Song.objects.all()
     serializer_class = CreateSongSerializer

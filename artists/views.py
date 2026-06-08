@@ -21,7 +21,9 @@ class ArtistCreateView(generics.CreateAPIView):
                 "email": artist.email
             }
         }, status=status.HTTP_201_CREATED)
-    
+
+
+
 
 class ArtistListView(generics.ListAPIView):
     queryset = Artist.objects.all()
