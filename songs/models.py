@@ -16,16 +16,27 @@ class Song(BaseModel):
     APPROVAL_STATUS = [('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')]
 
     song_id = models.AutoField(primary_key=True)
-    artist = models.ForeignKey('artists.Artist', on_delete=models.CASCADE, related_name='songs')
-    album = models.ForeignKey('album.Album', on_delete=models.SET_NULL, null=True, blank=True, related_name='songs')
+
+    artist = models.ForeignKey(
+        'artists.Artist',
+        on_delete=models.CASCADE,
+        related_name='songs'
+    )
+
+    album = models.ForeignKey(
+        'album.Album',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='songs'
+    )
+
     title = models.CharField(max_length=255)
-    genre = models.CharField(max_length=100)
     cover_image = models.ImageField(upload_to='songs/covers/')
-    audio_file = models.FileField(upload_to='songs/audio/')
     description = models.TextField(blank=True)
 
     genre = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
-    year_realesed = models.PositiveIntegerField(null=True, blank=True),  
+    year_realesed = models.PositiveIntegerField(null=True, blank=True) 
     audio_file = models.FileField(upload_to='songs/audio/')
     file_type = models.CharField(max_length=50, blank=True, null=True)  # New field to store file type (e.g., "mp3", "wav")
     file_size = models.PositiveIntegerField(null=True, blank=True)  # New field to store file size in bytes

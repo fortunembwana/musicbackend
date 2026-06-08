@@ -4,6 +4,8 @@ from user_management.models import BaseModel
 
 class Artist(BaseModel):
     artist_id = models.AutoField(primary_key=True)
+    full_name = models.CharField(max_length=100, blank=True, null=True)
+    lastname = models.CharField(max_length=30, blank=True, null=True)
     stage_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)

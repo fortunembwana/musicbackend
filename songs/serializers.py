@@ -96,27 +96,41 @@ class CreateSongSerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             validated_data['added_by'] = request.user  # Set added_by to the current user
         
-        if meta:
-            bitrate = meta['bitrate']
-            duration = meta['duration']
-            validated_data['bitrate'] = bitrate
-            validated_data['duration'] = timedelta(seconds=int(duration))
-            validated_data['quality'] = get_quality(bitrate)
-            validated_data['waveform'] = generate_waveform(duration)
-        else:
-            validated_data['bitrate'] = None
-            validated_data['duration'] = None
-            validated_data['quality'] = None
-            validated_data['waveform'] = None
-        
-        validated_data['file_size'] = validated_data['audio_file'].size if validated_data.get('audio_file') else None
-        validated_data['file_type'] = validated_data['audio_file'].name.split('.')[-1] if validated_data.get('audio_file') else None
+        audio_file = validated_data.get('audio_file')
 
-        return super().create(validated_data)
+        bitrate, duration = get_audio_metadata(audio_file)
+
+        validated_data['bitrate'] = bitrate
+
+        if duration:
+            validated_data['duration'] = timedelta(
+                seconds=int(duration)
+            )
+
+            validated_data['quality'] = (
+                get_quality(bitrate)
+                if bitrate
+                else None
+            )
+
+            validated_data['file_size'] = (
+                audio_file.size
+                if audio_file
+                else None
+            )
+
+            validated_data['file_type'] = (
+                audio_file.name.split('.')[-1]
+                if audio_file
+                else None
+            )
+
+            return super().create(validated_data)
+     
 
 class SongListSerializer(serializers.ModelSerializer):
     artist_name = serializers.CharField(source='artist.stage_name', read_only=True)
-    album_title = serializers.CharField(source='album.title', read_only=True)
+    album_title = serializers.CharField(source='album.album_name', read_only=True)
 
     class Meta:
         model = Song
@@ -124,10 +138,12 @@ class SongListSerializer(serializers.ModelSerializer):
 
 class SongDetailSerializer(serializers.ModelSerializer):
     artist_name = serializers.CharField(source='artist.stage_name', read_only=True)
-    album_title = serializers.CharField(source='album.title', read_only=True)
+    album_title = serializers.CharField(source='album.album_name', read_only=True)
 
     class Meta:
         model = Song
         fields = ['song_id', 'title', 'artist_name', 'album_title', 'genre', 'cover_image', 
                   'description', 'payment_status', 'approval_status', 'file_type', 'file_size', 'bitrate', 'quality', 'waveform',
                   'streams', 'downloads', 'uploaded_at']
+
+
